@@ -1,0 +1,25 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/static/polls/semantic/semantic.min.css">
+		<script
+		  src="/static/polls/semantic/jquery.js">  	
+		</script>
+		<script src="/static/polls/semantic/semantic.min.js"></script>
+	</head>
+	<body>
+		{% include "polls/top.html" %}
+		<div class="ui bottom attached segment">
+		  {% include "polls/sidebar.html" %}
+		  <div class="pusher">
+		    <div class="ui">
+		      <h3 class="ui">Application Content</h3>		      
+		    </div>
+		  </div>
+		</div>
+		<script type="text/javascript">			
+			function search_redirect(){
+				location.href = "/polls/search?q=" + $("#query").val() ;
+			}
+		</script>
+	</body>
+</html>

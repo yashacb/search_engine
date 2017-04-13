@@ -1,0 +1,91 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/static/polls/semantic/semantic.min.css">
+		<script
+		  src="/static/polls/semantic/jquery.js">  	
+		</script>
+		<script src="/static/polls/semantic/semantic.min.js"></script>
+	</head>
+	<body>
+		{% include "polls/top.html" %}
+		<div class="ui bottom attached segment">
+			{% include "polls/sidebar.html" %}		  
+		  <div class="pusher">
+		    <div class="ui basic segment">
+		    	<br />
+		      <div class="ui container">
+	      		<h1 class="ui header">Results for search query : {{ query }}</h1> <br /> <hr class="ui" /> <br /> <br />
+					  <div class="ui centered grid">
+						  <div class="four wide column">
+						    <select class="ui right dropdown" style="margin-right: 0%">
+						      <option {% if sort == 'rank_desc' %} selected {% endif %} value="rank_desc">Descending rank</option>
+						      <option {% if sort == 'rank_asc' %} selected {% endif %} value="rank_asc">Ascending rank</option>
+						      <option {% if sort == 'date_desc' %} selected {% endif %} value="date_desc">Newest first</option>
+						      <option {% if sort == 'date_asc' %} selected {% endif %} value="date_asc">Oldest first</option>
+						    </select>
+						  </div>
+						  <div class="eight wide column" style="text-align: center;font-size: 125%">
+						  	Page : {{ page|add:1 }}
+						  </div>
+						  <div class="two wide right aligned column">
+						  	<a href="/polls/search?q={{ query }}&page={{ page | add:-1 }}&sort={{ sort }}" class="ui {% if page <= 0 %} disabled {% endif %} primary button">Prev</a>
+						  </div>
+						  <div class="two wide right aligned column">
+						  	<a href="/polls/search?q={{ query }}&page={{ page | add:1 }}&sort={{ sort }}" class="ui {% if page >= 3 %} disabled {% endif %} secondary button">Next</a>
+						  </div>
+						</div><br />
+	      		<div class="ui padded divided items" style="font-size: 120%;">
+	      			{% for result in results %}
+	      				<div class="item piled" style="line-height: 200%">
+		      				<div class="image">
+		      					<img src="{{ result.url }}" width="480" height="360" />
+		      				</div>
+		      				<div class="content">
+		      					<div class="header">
+		      						{{ result.title }}
+		      					</div>
+		      					<div class="description" style="line-height: 200%">
+		      						{{ result.description | safe }}
+		      					</div>
+		      					<div class="extra">
+		      						<div class="ui green label">{{ result.channel }}</div>
+		      						<div class="ui blue label">{{ result.date }}</div>
+		      						<a href="/polls/video?q={{ query }}&video_id={{ result.video_id }}" class="ui right floated red button">
+							          See details
+							          <i class="right chevron icon"></i>
+							        </a>
+		      					</div>
+		      				</div>
+		      			</div>
+	      			{% endfor%}
+		      		</div>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		<script type="text/javascript">
+			function search_redirect(){
+				location.href = "/polls/search?q=" + $("#query").val() ;
+			}
+			$('select.dropdown')
+			  .dropdown({
+			  	onChange : function(value , text , $choice){
+			  		var q = get_Get('q') ;
+			  		location.href = '/polls/search?q=' + q + '&page=' + get_Get('page') + '&sort=' + value ;
+			  	}
+			  });
+		  function get_Get(key)
+		  {
+		  	var query = window.location.search.substring(1);
+			  var vars = query.split("&");
+			  for (var i=0;i<vars.length;i++) {
+			    var pair = vars[i].split("=");
+			    if (pair[0] == key) {
+			      return pair[1];
+			    }
+			  } 
+			  return ""
+		  }
+		</script>
+	</body>
+</html>

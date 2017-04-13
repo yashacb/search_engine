@@ -1,0 +1,25 @@
+<div class="ui top attached demo massive menu" style="text-align: center;">
+  <a class="item" onclick="toggle_sidebar()" style="width: 10%;">
+    <i class="sidebar icon"></i>
+  </a>
+  <div class="ui item" style="width: 80%;">
+    <div class="ui transparent icon input">
+      	<input value="{{ query }}" name="q" class="prompt" placeholder="&nbsp;&nbsp;Search videos..." type="text" id="query">
+    </div>
+    <div class="results"></div>
+  </div>
+  <a class="item" style="width: 10%; text-align: center;" onclick="search_redirect()" id="submit">
+	    <i class="search icon"></i>
+	    Search
+  </a>
+</div>
+
+<script type="text/javascript">
+	$('.ui.sidebar')
+	  .sidebar({
+	    dimPage : false 
+	  });
+	function toggle_sidebar(){
+		$('.ui.sidebar').sidebar('setting', 'transition', 'overlay').sidebar('toggle') ;
+	}
+</script>

@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/static/polls/semantic/semantic.min.css">
+		<script
+		  src="/static/polls/semantic/jquery.js">  	
+		</script>
+		<script src="/static/polls/semantic/semantic.min.js"></script>
+	</head>
+	<body>
+		{% include "polls/top.html" %}
+		<div class="ui container">
+			{% include "polls/sidebar.html" %}		  
+		  <div class="pusher">
+		  	<br /><br /><br />
+	  		<div class="ui divided grid">
+			  	<div class="row">
+			  		<div class="eleven wide column">
+				  		<div class="ui segment">
+				  			<div class="ui vertically divided grid">
+				  				<div class="row">
+				  					<div class="five wide column">
+			  							<img class="ui medium bordered image" src="{{ result.url }}" />
+				  					</div>
+				  					<div class="eleven wide column">
+				  						<h1 class="ui header">{{ result.title }}</h1>
+				  						<div class="ui extra">
+					  						<div class="ui green label">{{ result.channel }}</div>
+					  						<div class="ui blue label">{{ result.date }}</div>
+					  						<a target="_blank" href="https://www.youtube.com/watch?v={{ result.video_id }}" class="ui small right floated red button">
+								          Watch
+								          <i class="right chevron icon"></i>
+							        </a>
+				  						</div>
+				  					</div>
+				  				</div>
+				  				<div class="row">
+				  					<div class="sixteen wide column">
+				  						<h2 class="ui header">Description :</h2>
+				  						<div class="ui content">
+				  							<p style="font-size: 120%;line-height: 150%;">{{ result.description | safe }}</p>
+				  						</div>
+				  					</div>
+				  				</div>
+				  				<div class="row">
+				  					<div class="sixteen wide column">
+				  						<h2 class="ui header">Tags :</h2>
+				  						<p style="font-size: 120%;line-height: 150%;">{{ result.tags }}</p>
+				  					</div>
+				  				</div>
+				  			</div>
+				  		</div>
+			  		</div>
+				  	<div class="five wide column">
+				  		Heya2
+				  	</div>
+			  	</div>
+		  	</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function search_redirect(){
+				location.href = "/polls/search?q=" + $("#query").val() ;
+			}
+		  function get_Get(key)
+		  {
+		  	var query = window.location.search.substring(1);
+			  var vars = query.split("&");
+			  for (var i=0;i<vars.length;i++) {
+			    var pair = vars[i].split("=");
+			    if (pair[0] == key) {
+			      return pair[1];
+			    }
+			  } 
+			  return ""
+		  }
+		</script>
+	</body>
+</html>

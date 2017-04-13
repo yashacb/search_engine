@@ -1,0 +1,224 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/static/polls/semantic/semantic.min.css">
+		<script
+		  src="/static/polls/semantic/jquery.js">  	
+		</script>
+		<script src="/static/polls/semantic/semantic.min.js"></script>
+		<style type="text/css">
+			.maincont{
+				padding-top: 10% ;
+			}
+			body{
+				
+				background: transparent url("/static/polls/texture.png") repeat scroll 0% 0%;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="ui container maincont">
+			<div class="ui raised horizontal segments">
+			  <div class="ui clearing blue very padded segment">
+			  	<h2 style="color:blue;">Log in</h2>
+			    <form method="POST" onsubmit="return validate_login();" class = "ui form" action="/polls/login{% if follow %}?next={{ follow }} {% endif %}">{% csrf_token %}
+			    	<br />
+		    		<div class="required field">
+		    			<label>Username</label>
+		    			<input name="username" autocomplete="off" id="login_uname" placeholder="Username" type = "text" value="{{ l_username }}"/>
+		    		</div>
+		    		<br />
+		    		<div class="required field">
+		    			<label>Password</label>
+		    			<input name="password" autocomplete="off" id="login_pass" placeholder="Password" type = "password" value="{{ l_password }}"/>
+		    		</div>
+		    		<br />
+		    		<div class="field">
+		    			<button type="submit" class="ui right floated fluid animated icon large blue button">
+		    				<div class="visible content">Log in</div>
+							  <div class="hidden content">
+							  	<i class="right arrow icon"></i>
+							  </div>
+							</button>
+		    		</div>
+		    		<br />
+			    </form>
+			  </div>
+			  <div class="ui clearing red very padded segment">
+			  	<h2 style="color:red;">Sign up</h2>
+			    <form method="POST" onsubmit="return validate_register()" class = "ui form" action="/polls/register{% if follow %}?next={{ follow }} {% endif %}">{% csrf_token %}
+			    	<br />
+		    		<div class="required field">
+		    			<label>Username</label>
+		    			<input name="username" autocomplete="off" id="register_uname" placeholder="Username" type = "text" value="{{ username }}" />
+		    		</div>
+		    		<br />
+		    		<div class="required field">
+		    			<label>Password</label>
+		    			<input name="password" autocomplete="off" id="register_pass" placeholder="Password" type = "password" value="{{ password }}" />
+		    		</div>
+		    		<br />
+		    		<div class="required field">
+		    			<label>Re-enter Password</label>
+		    			<input autocomplete="off" id="register_repass" placeholder="Re-enter Password" type = "password" value="{{ password }}" />
+		    		</div>
+		    		<br />
+		    		<div class="field">
+		    			<button class="ui right floated fluid animated icon large red button">
+		    				<div class="visible content">Sign up</div>
+							  <div class="hidden content">
+							  	<i class="up arrow icon"></i>
+							  </div>
+							</button>
+		    		</div>
+		    		<br />
+			    </form>
+			  </div>
+			</div>
+			{% if username != "" or l_username != "" %}
+				<div class="ui large error message">
+					<i class="close icon"></i>
+				  <div class="header">
+				    There were some errors with your submission
+				  </div>
+				  <ul class="list">
+				    {% if username != "" %}<li>Username already exists.</li> {% endif %}
+				    {% if l_username != "" %}<li>Incorrect username or password.</li> {% endif %}
+				  </ul>
+				</div>
+			{% endif %}
+			<div class="ui large hidden error message" id="error_message">
+					<i class="close icon"></i>
+				  <div class="header">
+				    There were some errors with your submission
+				  </div>
+				  <ul class="list">
+				    <li>Invalid username or password.</li>
+				  </ul>
+				</div>
+		</div>
+		<script>
+			function validate_login(){
+				var error = 0 ;
+				uname = $('#login_uname') ;
+				if(!uname.val().match(/^[a-zA-Z0-9]{4,}$/))
+				{
+					uname.closest('div').addClass('error') ;
+					uname.popup({
+						content : 'Username must contain only alphanumeric characters and should be atleast 4 characters long.' ,
+						on : 'focus' ,
+						position : 'bottom left' ,
+						inline     : true
+					}) ;
+					error = 1 ;
+				}
+				else
+				{
+					console.log('Here235') ;
+					uname.closest('div').removeClass('error') ;
+					uname.popup('destroy') ;
+				}
+				pass = $('#login_pass') ;
+				if(!pass.val().match(/^[a-zA-Z0-9]{4,}$/))
+				{
+					pass.closest('div').addClass('error') ;
+					pass.popup({
+						content : 'Password must contain only alphanumeric characters and should be atleast 4 characters long.' ,
+						on : 'focus' ,
+						position : 'bottom left'
+					}) ;
+					error = 1 ;
+				}
+				else
+				{
+					console.log('Here') ;
+					pass.closest('div').removeClass('error') ;
+					pass.popup('destroy') ;
+				}
+				if(error == 1)
+				{
+					if($('#error_message').hasClass('hidden'))
+						$('#error_message').transition('fade in') ;
+				}
+				else
+				{
+					if(! $('#error_message').hasClass('hidden'))
+						$('#error_message').transition('fade out') ;
+				}
+				return error == 1 ? false : true ;
+			}
+
+			function validate_register(){
+				var error = 0 ;
+				uname = $('#register_uname') ;
+				if(!uname.val().match(/^[a-zA-Z0-9]{4,}$/))
+				{
+					uname.closest('div').addClass('error') ;
+					uname.popup({
+						content : 'Username must contain only alphanumeric characters and should be atleast 4 characters long.' ,
+						on : 'focus' ,
+						position : 'bottom left'
+					}) ;
+					error = 1 ;
+				}
+				else
+				{
+					console.log('Here') ;
+					uname.closest('div').removeClass('error') ;
+					uname.popup('destroy') ;
+				}
+				pass = $('#register_pass') ;
+				if(!pass.val().match(/^[a-zA-Z0-9]{4,}$/))
+				{
+					pass.closest('div').addClass('error') ;
+					pass.popup({
+						content : 'Password must contain only alphanumeric characters and should be atleast 4 characters long.' ,
+						on : 'focus' ,
+						position : 'bottom left'
+					}) ;
+					error = 1 ;
+				}
+				else
+				{
+					console.log('Here') ;
+					pass.closest('div').removeClass('error') ;
+					pass.popup('destroy') ;
+				}
+				repass = $('#register_repass') ;
+				if(repass.val() != pass.val())
+				{
+					repass.closest('div').addClass('error') ;
+					repass.popup({
+						content : 'Passwords do not match.' ,
+						on : 'focus' ,
+						position : 'bottom left'
+					}) ;
+					error = 1 ;
+				}
+				else
+				{
+					repass.closest('div').removeClass('error') ;
+					repass.popup('destroy') ;
+				}
+				if(error == 1)
+				{
+					if($('#error_message').hasClass('hidden'))
+						$('#error_message').transition('fade in') ;
+				}
+				else
+				{
+					if(! $('#error_message').hasClass('hidden'))
+						$('#error_message').transition('fade out') ;
+				}
+				return error == 1 ? false : true ;
+			}
+			$('.message .close')
+			  .on('click', function() {
+			    $(this)
+			      .closest('.message')
+			      .transition('fade')
+			    ;
+			  })
+			;
+		</script>
+	</body>
+</html>
