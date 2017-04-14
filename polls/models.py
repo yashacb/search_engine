@@ -17,3 +17,13 @@ class Choice(models.Model):
 class LinkMap(models.Model):
 	global_link = models.CharField(max_length = 500)
 	local_link = models.CharField(max_length = 500)
+
+class UserClick(models.Model):
+	word = models.CharField(max_length = 50)
+	video_id = models.CharField(max_length = 50)
+	count = models.IntegerField(default = 0)
+	username = models.CharField(max_length = 100)
+
+	class Meta:
+		unique_together = (('word' , 'video_id' , 'username'))
+

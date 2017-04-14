@@ -18,7 +18,7 @@
 	<body>
 		<div class="ui container maincont">
 			<div class="ui raised horizontal segments">
-			  <div class="ui clearing blue very padded segment">
+			  <div class="ui blue very padded segment">
 			  	<h2 style="color:blue;">Log in</h2>
 			    <form method="POST" onsubmit="return validate_login();" class = "ui form" action="/polls/login{% if follow %}?next={{ follow }} {% endif %}">{% csrf_token %}
 			    	<br />
@@ -43,7 +43,7 @@
 		    		<br />
 			    </form>
 			  </div>
-			  <div class="ui clearing red very padded segment">
+			  <div class="ui red very padded segment">
 			  	<h2 style="color:red;">Sign up</h2>
 			    <form method="POST" onsubmit="return validate_register()" class = "ui form" action="/polls/register{% if follow %}?next={{ follow }} {% endif %}">{% csrf_token %}
 			    	<br />
