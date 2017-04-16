@@ -14,7 +14,7 @@
 		    <div class="ui basic segment">
 		    	<br />
 		      <div class="ui container">
-	      		<h1 class="ui header">Results for search query : {{ query }}</h1> <br /> <hr class="ui" /> <br /> <br />
+	      		<h1 class="ui header">Recommendations based on your history : </h1> <br /> <hr class="ui" /> <br /> <br />
 					  <div class="ui centered grid">
 						  <div class="four wide column">
 						    <select class="ui right dropdown" style="margin-right: 0%">
@@ -28,10 +28,10 @@
 						  	Page : {{ page|add:1 }}
 						  </div>
 						  <div class="two wide right aligned column">
-						  	<a href="/polls/search?q={{ query }}&page={{ page | add:-1 }}&sort={{ sort }}" class="ui {% if prev == False %} disabled {% endif %} primary button">Prev</a>
+						  	<a href="/polls/recos?page={{ page | add:-1 }}&sort={{ sort }}" class="ui {% if prev == False %} disabled {% endif %} primary button">Prev</a>
 						  </div>
 						  <div class="two wide right aligned column">
-						  	<a href="/polls/search?q={{ query }}&page={{ page | add:1 }}&sort={{ sort }}" class="ui {% if nxt == False %} disabled {% endif %} secondary button">Next</a>
+						  	<a href="/polls/recos?page={{ page | add:1 }}&sort={{ sort }}" class="ui {% if nxt == False %} disabled {% endif %} secondary button">Next</a>
 						  </div>
 						</div><br />
 	      		<div class="ui padded divided items" style="font-size: 120%;">
@@ -71,7 +71,7 @@
 			  .dropdown({
 			  	onChange : function(value , text , $choice){
 			  		var q = get_Get('q') ;
-			  		location.href = '/polls/search?q=' + q + '&page=' + get_Get('page') + '&sort=' + value ;
+			  		location.href = '/polls/recos' + '?page=' + get_Get('page') + '&sort=' + value ;
 			  	}
 			  });
 		  function get_Get(key)
