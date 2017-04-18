@@ -5,56 +5,127 @@
 		  src="/static/polls/semantic/jquery.js">  	
 		</script>
 		<script src="/static/polls/semantic/semantic.min.js"></script>
+		<style type="text/css">
+			#maincont{
+				background: transparent url("/static/polls/texture.png") repeat scroll 0% 0%;	
+			}
+			#maincont2{
+				background: transparent url("/static/polls/texture.png") repeat scroll 0% 0%;	
+			}
+		</style>
 	</head>
 	<body>
 		{% include "polls/top.html" %}
-		<div class="ui container">
+		<div  id="maincont" class="ui bottom attached segment">
 			{% include "polls/sidebar.html" %}		  
 		  <div class="pusher">
-		  	<br /><br /><br />
-	  		<div class="ui divided grid">
-			  	<div class="row">
-			  		<div class="eleven wide column">
-				  		<div class="ui segment">
-				  			<div class="ui vertically divided grid">
-				  				<div class="row">
-				  					<div class="five wide column">
-			  							<img class="ui medium bordered image" src="{{ result.url }}" />
-				  					</div>
-				  					<div class="eleven wide column">
-				  						<h1 class="ui header">{{ result.title }}</h1>
-				  						<div class="ui extra">
-					  						<div class="ui green label">{{ result.channel }}</div>
-					  						<div class="ui blue label">{{ result.date }}</div>
-					  						<a target="_blank" href="https://www.youtube.com/watch?v={{ result.video_id }}" class="ui small right floated red button">
-								          Watch
-								          <i class="right chevron icon"></i>
-							        </a>
-				  						</div>
-				  					</div>
-				  				</div>
-				  				<div class="row">
-				  					<div class="sixteen wide column">
-				  						<h2 class="ui header">Description :</h2>
-				  						<div class="ui content">
-				  							<p style="font-size: 120%;line-height: 150%;">{{ result.description | safe }}</p>
-				  						</div>
-				  					</div>
-				  				</div>
-				  				<div class="row">
-				  					<div class="sixteen wide column">
-				  						<h2 class="ui header">Tags :</h2>
-				  						<p style="font-size: 120%;line-height: 150%;">{{ result.tags }}</p>
-				  					</div>
-				  				</div>
-				  			</div>
+	  		<div class="ui container">
+		  		<br /><br /><br /><br />
+	  			<div id="maincont2" style="background-color: #FFF ;" class="ui divided grid">
+				  	<div class="row">
+				  		<div class="ten wide column">
+					  		<div class="ui segment">
+					  			<div class="ui vertically divided grid">
+					  				<div class="row">
+					  					<div class="five wide column">
+				  							<img class="ui medium bordered image" src="{{ result.url }}" />
+					  					</div>
+					  					<div class="eleven wide column">
+					  						<h1 class="ui header">{{ result.title }}</h1>
+					  						<div class="ui extra">
+						  						<div class="ui green label">{{ result.channel }}</div>
+						  						<div class="ui blue label">{{ result.date }}</div>
+						  						<a target="_blank" href="https://www.youtube.com/watch?v={{ result.video_id }}" class="ui small right floated red button">
+									          Watch
+									          <i class="right chevron icon"></i>
+								        </a>
+					  						</div>
+					  					</div>
+					  				</div>
+					  				<div class="row">
+					  					<div class="sixteen wide column">
+					  						<h2 class="ui header">Description :</h2>
+					  						<div class="ui content">
+					  							<p style="font-size: 120%;line-height: 150%;">{{ result.description | safe}}</p>
+					  						</div>
+					  					</div>
+					  				</div>
+					  				<div class="row">
+					  					<div class="sixteen wide column">
+					  						<h2 class="ui header">Statistics :</h2>
+					  						<div class="ui content" style="line-height: 150%">
+					  							<div class="ui padded grid">
+					  								<div class="row">
+					  									<div style="font-size: 130%;" class="four wide column"><b>View Count</b></div>
+					  									<div style="font-size: 125%;" class="twelve wide column"><b>:</b>&nbsp;&nbsp;&nbsp;{{ result.views }}</div>
+					  								</div>
+					  								<div class="row">
+					  									<div style="font-size: 130%;" class="four wide column"><b>Like Count</b></div>
+					  									<div style="font-size: 125%;" class="twelve wide column"><b>:</b>&nbsp;&nbsp;&nbsp;{{ result.likes }}</div>
+					  								</div>
+					  								<div class="row">
+					  									<div style="font-size: 130%;" class="four wide column"><b>Dislike Count</b></div>
+					  									<div style="font-size: 125%;" class="twelve wide column"><b>:</b>&nbsp;&nbsp;&nbsp;{{ result.dislikes }}</div>
+					  								</div>
+					  								<div class="row">
+					  									<div style="font-size: 130%;" class="four wide column"><b>Favoutire Count</b></div>
+					  									<div style="font-size: 125%;" class="twelve wide column"><b>:</b>&nbsp;&nbsp;&nbsp;{{ result.favourites }}</div>
+					  								</div>
+					  								<div class="row">
+					  									<div style="font-size: 130%;" class="four wide column"><b>Comment Count</b></div>
+					  									<div style="font-size: 125%;" class="twelve wide column"><b>:</b>&nbsp;&nbsp;&nbsp;{{ result.comments }}</div>
+					  								</div>
+					  							</div>
+					  						</div>
+					  					</div>
+					  				</div>
+					  				<div class="row">
+					  					<div class="sixteen wide column">
+					  						<h2 class="ui header">Tags :</h2>
+					  						<p style="font-size: 120%;line-height: 150%;">{{ result.tags }}</p>
+					  					</div>
+					  				</div>
+					  			</div>
+					  		</div>
 				  		</div>
-			  		</div>
-				  	<div class="five wide column">
-				  		Heya2
+					  	<div class="six wide column">
+					  		<div class="ui padded segment">
+					  			<div class="ui divided items" style="font-size: 105%;">
+				      			{% for result in results %}
+				      				<div class="item piled" style="line-height: 120%">
+					      				<div class="ui grid">
+					      					<div class="row">
+				      							<div class="six wide column">
+				      								<img class="ui small image" src="{{result.url}}" />
+				      							</div>
+				      							<div class="ten wide column">
+				      								<h3 class="header">{{ result.title }}</h3>
+				      							</div>
+					      					</div>
+					      					<div class="row">
+					      						<div class="sixteen wide column">
+				      								<div class="description" style="line-height: 150%">{{ result.description|truncatechars:200}}</div>
+			      								</div>
+					      					</div>
+					      					<div class="row">
+					      						<div class="sixteen wide column">
+					      							<div class="ui green label">{{ result.channel }}</div>
+						      						<div class="ui blue label">{{ result.date }}</div>
+						      						<a href="/polls/video?q={{ query }}&video_id={{ result.video_id }}" class="ui right floated very small red button">
+											          See details
+											          <i class="right chevron icon"></i>
+											        </a>
+					      						</div>
+					      					</div>
+					      				</div>
+					      			</div>
+				      			{% endfor%}
+				      		</div>
+					  		</div>
+					  	</div>
 				  	</div>
 			  	</div>
-		  	</div>
+	  		</div>
 			</div>
 		</div>
 		<script type="text/javascript">

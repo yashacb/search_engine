@@ -19,8 +19,12 @@ import enchant
 # Create your views here.
 @login_required(login_url='/polls/index')
 def reco(request):
-	request.session['changed'] = 0
-	results = utilities.get_recos(request.user.username)
+	if request.session.get('changed' , 1) or request.session.get('recos' , '') == '':
+		results = utilities.get_recos(request.user.username)
+		request.session['changed'] = 0
+		request.session['recos'] = results # cache the results
+	else:
+		results = request.session.get('recos' , '')
 
 	p = int(request.GET.get('page' , '0'))
 
@@ -74,7 +78,12 @@ def search(request):
 			    { "$match" : { "$text" : { "$search" : search_query } } } ,
 			    { "$project" : { "score": { "$meta": "textScore" } , "title" : "$videoInfo.snippet.title" , "description" : "$videoInfo.snippet.description" 
 			    , "thumbnail" : "$videoInfo.snippet.thumbnails.default.url" , "channel" : "$videoInfo.snippet.channelTitle" 
-			    , "published" : "$videoInfo.snippet.publishedAt" , "video_id" : "$videoInfo.id" } } ,
+			    , "published" : "$videoInfo.snippet.publishedAt" , "video_id" : "$videoInfo.id"
+			    , "likes" : "$videoInfo.statistics.likeCount" 
+			    , "comments" : "$videoInfo.statistics.commentCount"
+			    , "favourites" : "$videoInfo.statistics.favoriteCount"
+			    , "dislikes" : "$videoInfo.statistics.dislikeCount"
+			    , "views" : "$videoInfo.statistics.viewCount"} } ,
 			    { "$sort" : { "score" : -1 } },
 			    { "$limit" : 20 } 
 			]
@@ -87,7 +96,7 @@ def search(request):
 				one['rank'] = rank
 				rank = rank + 1 
 				one['title'] = doc['title']
-				one['description'] = utilities.sanitize(str(a[:400] + '....' if len(a) > 400 else len(a)))
+				one['description'] = utilities.sanitize(str(a[:400] + '....' if len(a) > 400 else len(a)) , anchors = False)
 				one['channel'] = doc['channel']				
 				one['url'] = LinkMap.objects.filter(global_link = doc['thumbnail'])[0].local_link
 				one['date'] = utilities.readable_date(doc['published'].split('T')[0])
@@ -151,6 +160,11 @@ def video(request):
 		res['channel'] = doc['videoInfo']['snippet']['channelTitle']
 		res['date'] = utilities.readable_date(doc['videoInfo']['snippet']['publishedAt'].split('T')[0])
 		res['url'] = LinkMap.objects.filter(global_link = doc['videoInfo']['snippet']['thumbnails']['default']['url'])[0].local_link
+		res['likes'] = doc['videoInfo']['statistics']['likeCount']
+		res['views'] = doc['videoInfo']['statistics']['viewCount']
+		res['dislikes'] = doc['videoInfo']['statistics']['dislikeCount']
+		res['favourites'] = doc['videoInfo']['statistics']['favoriteCount']
+		res['comments'] = doc['videoInfo']['statistics']['commentCount']
 
 		q = request.GET.get('q' , '')
 		if q != '':
@@ -165,7 +179,9 @@ def video(request):
 				r.save()
 
 		client.close()
-		return render(request , 'polls/video.html' , { 'query' : request.GET.get('q' , '') , 'result' : res , 'name' : request.user.username} )
+		results = utilities.get_recos(request.user.username , request.GET.get('video_id' , ''))
+		return render(request , 'polls/video.html' , { 'query' : request.GET.get('q' , '') , 'result' : res , 'name' : request.user.username ,
+			'results' : results} )
 	return redirect('/polls/home')
 
 def login_view(request):

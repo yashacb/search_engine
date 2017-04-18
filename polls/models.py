@@ -27,3 +27,6 @@ class UserClick(models.Model):
 	class Meta:
 		unique_together = (('word' , 'video_id' , 'username'))
 
+	def __str__(self) :
+		return self.word + ' ' + self.video_id + ' ' + str(self.count) + ' ' + self.username
+

@@ -5,15 +5,20 @@
 		  src="/static/polls/semantic/jquery.js">  	
 		</script>
 		<script src="/static/polls/semantic/semantic.min.js"></script>
+		<style type="text/css">
+			#maincont{				
+				background: transparent url("/static/polls/texture.png") repeat scroll 0% 0%;
+			}
+		</style>
 	</head>
 	<body>
 		{% include "polls/top.html" %}
-		<div class="ui bottom attached segment">
+		<div id="maincont" class="ui bottom attached segment">
 			{% include "polls/sidebar.html" %}		  
 		  <div class="pusher">
-		    <div class="ui basic segment">
+		    <div class="ui container">
 		    	<br />
-		      <div class="ui container">
+		      <div style="background-color: #FFF ;" class="ui very padded container segment">
 	      		<h1 class="ui header">Results for search query : {{ query }}</h1> <br /> <hr class="ui" /> <br /> <br />
 					  <div class="ui centered grid">
 						  <div class="four wide column">
@@ -58,7 +63,7 @@
 		      				</div>
 		      			</div>
 	      			{% endfor%}
-		      		</div>
+	      		</div>
 		      </div>
 		    </div>
 		  </div>
@@ -66,7 +71,7 @@
 		<script type="text/javascript">
 			function search_redirect(){
 				location.href = "/polls/search?q=" + $("#query").val() ;
-			}
+			}			
 			$('select.dropdown')
 			  .dropdown({
 			  	onChange : function(value , text , $choice){
