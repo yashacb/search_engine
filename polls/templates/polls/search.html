@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<title>Search</title>
 		<link rel="stylesheet" type="text/css" href="/static/polls/semantic/semantic.min.css">
 		<script
 		  src="/static/polls/semantic/jquery.js">  	
@@ -33,10 +34,10 @@
 						  	Page : {{ page|add:1 }}
 						  </div>
 						  <div class="two wide right aligned column">
-						  	<a href="/polls/search?q={{ query }}&page={{ page | add:-1 }}&sort={{ sort }}" class="ui {% if prev == False %} disabled {% endif %} primary button">Prev</a>
+						  	<a href="/polls/search?q={{ query }}&page={{ page | add:-1 }}&sort={{ sort }}&channel_title={{channel_title}}" class="ui {% if prev == False %} disabled {% endif %} primary button">Prev</a>
 						  </div>
 						  <div class="two wide right aligned column">
-						  	<a href="/polls/search?q={{ query }}&page={{ page | add:1 }}&sort={{ sort }}" class="ui {% if nxt == False %} disabled {% endif %} secondary button">Next</a>
+						  	<a href="/polls/search?q={{ query }}&page={{ page | add:1 }}&sort={{ sort }}&channel_title={{channel_title}}" class="ui {% if nxt == False %} disabled {% endif %} secondary button">Next</a>
 						  </div>
 						</div><br />
 	      		<div class="ui padded divided items" style="font-size: 120%;">
@@ -50,10 +51,10 @@
 		      						{{ result.title }}
 		      					</div>
 		      					<div class="description" style="line-height: 200%">
-		      						{{ result.description | safe }}
+		      						{{ result.description | truncatechars:200 }}
 		      					</div>
 		      					<div class="extra">
-		      						<div class="ui green label">{{ result.channel }}</div>
+		      						<a href="/polls/search?channel_title={{result.channel}}" class="ui green label">{{ result.channel }}</a>
 		      						<div class="ui blue label">{{ result.date }}</div>
 		      						<a href="/polls/video?q={{ query }}&video_id={{ result.video_id }}" class="ui right floated red button">
 							          See details
@@ -76,7 +77,10 @@
 			  .dropdown({
 			  	onChange : function(value , text , $choice){
 			  		var q = get_Get('q') ;
-			  		location.href = '/polls/search?q=' + q + '&page=' + get_Get('page') + '&sort=' + value ;
+			  		if(q != 0)
+			  			location.href = '/polls/search?q=' + q + '&page=' + get_Get('page') + '&sort=' + value ;
+			  		else if(get_Get('channel_title') != 0)
+			  			location.href = '/polls/search?q=&channel_title=' + get_Get('channel_title') + '&page=' + get_Get('page') + '&sort=' + value ;
 			  	}
 			  });
 		  function get_Get(key)
@@ -89,7 +93,7 @@
 			      return pair[1];
 			    }
 			  } 
-			  return ""
+			  return 0 ;
 		  }
 		</script>
 	</body>

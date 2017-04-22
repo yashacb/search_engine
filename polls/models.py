@@ -23,6 +23,7 @@ class UserClick(models.Model):
 	video_id = models.CharField(max_length = 50)
 	count = models.IntegerField(default = 0)
 	username = models.CharField(max_length = 100)
+	recenttime=models.DateTimeField('date published')
 
 	class Meta:
 		unique_together = (('word' , 'video_id' , 'username'))
@@ -30,3 +31,9 @@ class UserClick(models.Model):
 	def __str__(self) :
 		return self.word + ' ' + self.video_id + ' ' + str(self.count) + ' ' + self.username
 
+class UserBlacklist(models.Model):
+	username = models.CharField(max_length = 100)
+	video_id = models.CharField(max_length = 50)
+
+	class Meta:
+		unique_together = (('video_id' , 'username'))

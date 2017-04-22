@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Home</title>
+		<title>History</title>
 		<link rel="stylesheet" type="text/css" href="/static/polls/semantic/semantic.min.css">
 		<script
 		  src="/static/polls/semantic/jquery.js">  	
@@ -20,16 +20,22 @@
 		    <div class="ui container">
 		    	<br />
 		    	<div style="background-color: #FFF ;" class="ui very padded segment">
-		      		<h1 class="ui header">Trending Videos : </h1> <br /> <hr class="ui" /> <br /> <br />
+		      		<h1 class="ui header">Recent history : </h1> <br /> <hr class="ui" /> <br /> <br />
 					  <div class="ui centered grid">
+						  <div class="four wide column">
+						    <select class="ui right dropdown" style="margin-right: 0%">
+						      <option {% if sort == 'rank_desc' %} selected {% endif %} value="rank_desc">Recent First</option>
+						      <option {% if sort == 'rank_asc' %} selected {% endif %} value="rank_asc">Oldest First</option>
+						     </select>
+						  </div>
 						  <div class="eight wide column" style="text-align: center;font-size: 125%">
 						  	Page : {{ page|add:1 }}
 						  </div>
 						  <div class="two wide right aligned column">
-						  	<a href="/polls/home?page={{ page | add:-1 }}&sort={{ sort }}" class="ui {% if prev == False %} disabled {% endif %} primary button">Prev</a>
+						  	<a href="/polls/hist?page={{ page | add:-1 }}&sort={{ sort }}" class="ui {% if prev == False %} disabled {% endif %} primary button">Prev</a>
 						  </div>
 						  <div class="two wide right aligned column">
-						  	<a href="/polls/home?page={{ page | add:1 }}&sort={{ sort }}" class="ui {% if nxt == False %} disabled {% endif %} secondary button">Next</a>
+						  	<a href="/polls/hist?page={{ page | add:1 }}&sort={{ sort }}" class="ui {% if nxt == False %} disabled {% endif %} secondary button">Next</a>
 						  </div>
 						</div><br />
 		      		<div class="ui padded divided items" style="font-size: 120%;">
@@ -69,7 +75,7 @@
 			  .dropdown({
 			  	onChange : function(value , text , $choice){
 			  		var q = get_Get('q') ;
-			  		location.href = '/polls/home' + '?page=' + get_Get('page') + '&sort=' + value ;
+			  		location.href = '/polls/hist' + '?page=' + get_Get('page') + '&sort=' + value ;
 			  	}
 			  });
 		  function get_Get(key)

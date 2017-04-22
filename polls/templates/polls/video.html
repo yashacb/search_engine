@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<title>Video Details</title>
 		<link rel="stylesheet" type="text/css" href="/static/polls/semantic/semantic.min.css">
 		<script
 		  src="/static/polls/semantic/jquery.js">  	
@@ -38,7 +39,11 @@
 						  						<a target="_blank" href="https://www.youtube.com/watch?v={{ result.video_id }}" class="ui small right floated red button">
 									          Watch
 									          <i class="right chevron icon"></i>
-								        </a>
+								        	</a><br /><br />
+						  						<div class="ui slider checkbox">
+													  <input id="blacklist" name="newsletter" type="checkbox" onclick="blacklist()">
+													  <label>Blacklist</label>
+													</div>
 					  						</div>
 					  					</div>
 					  				</div>
@@ -80,9 +85,11 @@
 					  					</div>
 					  				</div>
 					  				<div class="row">
-					  					<div class="sixteen wide column">
+					  					<div class="sixteen wide column" style="line-height:230%;">
 					  						<h2 class="ui header">Tags :</h2>
-					  						<p style="font-size: 120%;line-height: 150%;">{{ result.tags }}</p>
+					  						{% for tag in result.tags %}
+					  						<div class="ui teal tag label">{{ tag }}</div>
+					  						{% endfor %}
 					  					</div>
 					  				</div>
 					  			</div>
@@ -142,8 +149,25 @@
 			      return pair[1];
 			    }
 			  } 
-			  return ""
+			  return 0 ;
 		  }
+		  {% if result.blacklist == 1 %} 
+		  	$('.ui.checkbox').checkbox('check') ;
+		  {%  endif %}
+		  $('.ui.checkbox').checkbox({
+		  	'onChecked' : function(){ 
+		  		console.log("Checked") ;
+		  		$.get( "/polls/addbl?video_id=" + get_Get('video_id'), function( data ) {
+					  console.log(data) ;
+					});
+		  	} ,
+		  	'onUnchecked' : function(){ 
+		  		console.log("unChecked") ;
+		  		$.get( "/polls/delbl?video_id=" + get_Get('video_id'), function( data ) {
+					  console.log(data) ;
+					});
+		  	} 
+		  }) ;
 		</script>
 	</body>
 </html>

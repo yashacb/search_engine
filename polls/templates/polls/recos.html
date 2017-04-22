@@ -1,19 +1,25 @@
 <html>
 	<head>
+		<title>Recommendations</title>
 		<link rel="stylesheet" type="text/css" href="/static/polls/semantic/semantic.min.css">
 		<script
 		  src="/static/polls/semantic/jquery.js">  	
 		</script>
 		<script src="/static/polls/semantic/semantic.min.js"></script>
+		<style type="text/css">
+			#maincont{				
+				background: transparent url("/static/polls/texture.png") repeat scroll 0% 0%;
+			}
+		</style>
 	</head>
 	<body>
 		{% include "polls/top.html" %}
-		<div class="ui bottom attached segment">
+		<div id="maincont" class="ui bottom attached segment">
 			{% include "polls/sidebar.html" %}		  
 		  <div class="pusher">
-		    <div class="ui basic segment">
+		    <div class="ui container">
 		    	<br />
-		      <div class="ui container">
+		      <div style="background-color: #FFF ;" class="ui very padded segment">
 	      		<h1 class="ui header">Recommendations based on your history : </h1> <br /> <hr class="ui" /> <br /> <br />
 					  <div class="ui centered grid">
 						  <div class="four wide column">
@@ -34,30 +40,30 @@
 						  	<a href="/polls/recos?page={{ page | add:1 }}&sort={{ sort }}" class="ui {% if nxt == False %} disabled {% endif %} secondary button">Next</a>
 						  </div>
 						</div><br />
-	      		<div class="ui padded divided items" style="font-size: 120%;">
-	      			{% for result in results %}
-	      				<div class="item piled" style="line-height: 200%">
-		      				<div class="image">
-		      					<img src="{{ result.url }}" width="480" height="360" />
-		      				</div>
-		      				<div class="content">
-		      					<div class="header">
-		      						{{ result.title }}
-		      					</div>
-		      					<div class="description" style="line-height: 200%">
-		      						{{ result.description | safe }}
-		      					</div>
-		      					<div class="extra">
-		      						<div class="ui green label">{{ result.channel }}</div>
-		      						<div class="ui blue label">{{ result.date }}</div>
-		      						<a href="/polls/video?q={{ query }}&video_id={{ result.video_id }}" class="ui right floated red button">
-							          See details
-							          <i class="right chevron icon"></i>
-							        </a>
-		      					</div>
-		      				</div>
-		      			</div>
-	      			{% endfor%}
+	      			<div class="ui padded divided items" style="font-size: 120%;">
+		      			{% for result in results %}
+		      				<div class="item piled" style="line-height: 200%">
+			      				<div class="image">
+			      					<img src="{{ result.url }}" width="480" height="360" />
+			      				</div>
+			      				<div class="content">
+			      					<div class="header">
+			      						{{ result.title }}
+			      					</div>
+			      					<div class="description" style="line-height: 200%">
+			      						{{ result.description | truncatechars:200}}
+			      					</div>
+			      					<div class="extra">
+			      						<div class="ui green label">{{ result.channel }}</div>
+			      						<div class="ui blue label">{{ result.date }}</div>
+			      						<a href="/polls/video?q={{ query }}&video_id={{ result.video_id }}" class="ui right floated red button">
+								          See details
+								          <i class="right chevron icon"></i>
+								        </a>
+			      					</div>
+			      				</div>
+			      			</div>
+		      			{% endfor%}
 		      		</div>
 		      </div>
 		    </div>
@@ -84,7 +90,7 @@
 			      return pair[1];
 			    }
 			  } 
-			  return ""
+			  return 0 ;
 		  }
 		</script>
 	</body>

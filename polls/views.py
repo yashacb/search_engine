@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate , login , logout
 from django.contrib.auth.decorators import login_required
 
 from pymongo import MongoClient
-from .models import LinkMap , UserClick
+from .models import LinkMap , UserClick , UserBlacklist
 from py2neo import Graph , NodeSelector
 from stemming.porter2 import stem
 
@@ -57,7 +57,25 @@ def reco(request):
 
 @login_required(login_url='/polls/index')
 def home(request):
-	return render(request , 'polls/home.html' , { 'name' : request.user.username })
+	results = utilities.get_trend(request.user.username)
+	
+	p = int(request.GET.get('page' , '0'))
+	sort_by = request.GET.get('sort' , 'rank_desc')
+	
+	lower = p*5
+	if lower >= len(results):
+		lower = 0
+		p = 0
+	upper = lower + 5 ;
+	prev = True
+	nxt = True
+	if lower == 0:
+		prev = False
+	if upper >= len(results):
+		nxt = False
+	return render(request , 'polls/home.html' , { 'results' : results[lower:upper] , 'query' : '' , 
+		'page' : p , 'sort' : request.GET.get('sort' , 'rank_desc') , 'name' : request.user.username , 'prev' : prev , 'nxt' : nxt})
+	return redirect('/polls/home')	
 
 @login_required(login_url='/polls/index')
 def search(request):	
@@ -68,47 +86,51 @@ def search(request):
 			word = d.suggest(lis[i].lower())[0]
 			lis[i] = word
 	search_query = ' '.join(lis)	
-	if search_query != '':		
+	if search_query != '' or request.GET.get('channel_title' , '') != '':		
 		results = []
-		if search_query != request.session.get('c_query' , ''):
-			#results from mongodb
-			client = MongoClient()
-			db = client['videos']
-			pipeline = [
-			    { "$match" : { "$text" : { "$search" : search_query } } } ,
-			    { "$project" : { "score": { "$meta": "textScore" } , "title" : "$videoInfo.snippet.title" , "description" : "$videoInfo.snippet.description" 
-			    , "thumbnail" : "$videoInfo.snippet.thumbnails.default.url" , "channel" : "$videoInfo.snippet.channelTitle" 
-			    , "published" : "$videoInfo.snippet.publishedAt" , "video_id" : "$videoInfo.id"
-			    , "likes" : "$videoInfo.statistics.likeCount" 
-			    , "comments" : "$videoInfo.statistics.commentCount"
-			    , "favourites" : "$videoInfo.statistics.favoriteCount"
-			    , "dislikes" : "$videoInfo.statistics.dislikeCount"
-			    , "views" : "$videoInfo.statistics.viewCount"} } ,
-			    { "$sort" : { "score" : -1 } },
-			    { "$limit" : 20 } 
-			]
-			cursor = db.videos.aggregate(pipeline)
-			rank = 1 
-			for doc in cursor:
-				a = doc['description'].encode('utf-8').strip()
-				a = ''.join([i if ord(i) < 128 else '' for i in a])
-				one = {}
-				one['rank'] = rank
-				rank = rank + 1 
-				one['title'] = doc['title']
-				one['description'] = utilities.sanitize(str(a[:400] + '....' if len(a) > 400 else len(a)) , anchors = False)
-				one['channel'] = doc['channel']				
-				one['url'] = LinkMap.objects.filter(global_link = doc['thumbnail'])[0].local_link
-				one['date'] = utilities.readable_date(doc['published'].split('T')[0])
-				one['video_id'] = doc['video_id']
-				one['score'] = doc['score']
-				results.append(one)
-			client.close()
-			request.session['c_query'] = search_query # cache the current result
-			request.session['c_results'] = results
-			#end
+		if search_query != '' :
+			if search_query != request.session.get('c_query' , '') or request.session.get('changed' , 1) == 1 :
+				#results from mongodb
+				client = MongoClient()
+				db = client['videos']
+				pipeline = [
+				    { "$match" : { "$text" : { "$search" : search_query } } } ,
+				    { "$project" : { "score": { "$meta": "textScore" } , "title" : "$videoInfo.snippet.title" , "description" : "$videoInfo.snippet.description" 
+				    , "thumbnail" : "$videoInfo.snippet.thumbnails.default.url" , "channel" : "$videoInfo.snippet.channelTitle" 
+				    , "published" : "$videoInfo.snippet.publishedAt" , "video_id" : "$videoInfo.id"
+				    , "likes" : "$videoInfo.statistics.likeCount" 
+				    , "comments" : "$videoInfo.statistics.commentCount"
+				    , "favourites" : "$videoInfo.statistics.favoriteCount"
+				    , "dislikes" : "$videoInfo.statistics.dislikeCount"
+				    , "views" : "$videoInfo.statistics.viewCount"} } ,
+				    { "$sort" : { "score" : -1 } },
+				    { "$limit" : 20 } 
+				]
+				cursor = db.videos.aggregate(pipeline)
+				rank = 1 
+				for doc in cursor:
+					a = doc['description'].encode('utf-8').strip()
+					a = ''.join([i if ord(i) < 128 else '' for i in a])
+					one = {}
+					one['rank'] = rank
+					rank = rank + 1 
+					one['title'] = doc['title']
+					one['description'] = utilities.sanitize(a , anchors=False)
+					one['channel'] = doc['channel']				
+					one['url'] = LinkMap.objects.filter(global_link = doc['thumbnail'])[0].local_link
+					one['date'] = utilities.readable_date(doc['published'].split('T')[0])
+					one['video_id'] = doc['video_id']
+					one['score'] = doc['score']
+					if not utilities.is_blacklisted(request.user.username , one['video_id']) :
+						results.append(one)
+				client.close()
+				request.session['c_query'] = search_query # cache the current result
+				request.session['c_results'] = results
+				#end
+			else :
+				results = request.session['c_results']
 		else :
-			results = request.session['c_results']
+			results = utilities.get_channel_videos(request.user.username , request.GET.get('channel_title'))
 		p = int(request.GET.get('page' , '0'))
 		
 		#adding scores of history
@@ -139,7 +161,8 @@ def search(request):
 		if upper >= len(results):
 			nxt = False
 		return render(request , 'polls/search.html' , { 'results' : results[lower:upper] , 'query' : search_query , 
-			'page' : p , 'sort' : request.GET.get('sort' , 'rank_desc') , 'name' : request.user.username , 'prev' : prev , 'nxt' : nxt})
+			'page' : p , 'sort' : request.GET.get('sort' , 'rank_desc') , 'name' : request.user.username , 'prev' : prev , 'nxt' : nxt , 
+			'channel_title' : request.GET.get('channel_title' , '')})
 	return redirect('/polls/home')
 
 @login_required(login_url='/polls/index')
@@ -153,7 +176,7 @@ def video(request):
 		res['video_id'] = doc['videoInfo']['id']
 		res['title'] = doc['videoInfo']['snippet']['title']
 		res['description'] = doc['videoInfo']['snippet']['description']
-		res['tags'] = ' , '.join(doc['videoInfo']['snippet']['tags'])
+		res['tags'] = doc['videoInfo']['snippet']['tags']
 		a = res['description'].encode('utf-8').strip()
 		a = ''.join([i if ord(i) < 128 else '' for i in a])
 		res['description'] = utilities.sanitize(a)
@@ -165,23 +188,77 @@ def video(request):
 		res['dislikes'] = doc['videoInfo']['statistics']['dislikeCount']
 		res['favourites'] = doc['videoInfo']['statistics']['favoriteCount']
 		res['comments'] = doc['videoInfo']['statistics']['commentCount']
+		res['blacklist'] = utilities.is_blacklisted(request.user.username , res['video_id'])
 
 		q = request.GET.get('q' , '')
 		if q != '':
 			words = re.sub("[^\w]+" , " " , q).split()
 			stemmed_words = [stem(word) for word in words]
-			for word in stemmed_words:
-				try:
-					r = UserClick.objects.filter(username = request.user.username , word = word , video_id = request.GET.get('video_id' , ''))[0]
-					r.count = r.count + 1 
-				except IndexError:
-					r = UserClick(username = request.user.username , word = word , video_id = request.GET.get('video_id' , '') , count = 1)			
-				r.save()
+		else:
+			stemmed_words = ['$']
+		for word in stemmed_words:
+			try:
+				r = UserClick.objects.filter(username = request.user.username , word = word , video_id = request.GET.get('video_id' , ''))[0]
+				r.count = r.count + 1 
+				r.recenttime= datetime.datetime.now()
+			except IndexError:
+				r = UserClick(username = request.user.username , word = word , video_id = request.GET.get('video_id' , '') , count = 1,recenttime=datetime.datetime.now())			
+			r.save()
 
 		client.close()
 		results = utilities.get_recos(request.user.username , request.GET.get('video_id' , ''))
 		return render(request , 'polls/video.html' , { 'query' : request.GET.get('q' , '') , 'result' : res , 'name' : request.user.username ,
 			'results' : results} )
+	return redirect('/polls/home')
+
+@login_required(login_url='/polls/index')
+def history(request):
+	if request.session.get('changed' , 1) or request.session.get('hist' , '') == '':
+		results = utilities.get_hist(request.user.username)
+		request.session['changed'] = 0
+		request.session['hist'] = results # cache the results
+	else:
+		results = request.session.get('hist' , '')
+
+	p = int(request.GET.get('page' , '0'))
+	sort_by = request.GET.get('sort' , 'rank_desc')
+	if sort_by == 'rank_desc':
+		results.sort(key=lambda r : r['score'])
+	elif sort_by == 'rank_asc':
+		results.sort(key=lambda r : r['score'] , reverse=True)
+
+	lower = p*5
+	if lower >= len(results):
+		lower = 0
+		p = 0
+	upper = lower + 5 ;
+	prev = True
+	nxt = True
+	if lower == 0:
+		prev = False
+	if upper >= len(results):
+		nxt = False
+	return render(request , 'polls/hist.html' , { 'results' : results[lower:upper] , 'query' : '' , 
+		'page' : p , 'sort' : request.GET.get('sort' , 'rank_desc') , 'name' : request.user.username , 'prev' : prev , 'nxt' : nxt})
+	return redirect('/polls/home')	
+
+@login_required(login_url='/polls/index')
+def blacklist(request):
+	results=utilities.get_blacklist(request.user.username)
+	p = int(request.GET.get('page' , '0'))
+	lower = p*5
+	if lower >= len(results):
+		lower = 0
+		p = 0
+	upper = lower + 5 ;
+	prev = True
+	nxt = True
+	if lower == 0:
+		prev = False
+	if upper >= len(results):
+		nxt = False
+	return render(request , 'polls/blacklist.html' , { 'results' : results[lower:upper] , 'query' : '' , 
+		'page' : p , 'sort' : request.GET.get('sort' , 'rank_desc') , 'name' : request.user.username , 'prev' : prev , 'nxt' : nxt})
 	return redirect('/polls/home')
 
 def login_view(request):
@@ -230,3 +307,28 @@ def index(request):
 	follow = request.GET.get('next')
 	return render(request , 'polls/index.html' , { 'username' : username , 'password' : password , 
 		'l_username' : l_username , 'l_password' : l_password , 'follow' : follow})
+
+def add_blacklist(request):
+	request.session['changed'] = 1 
+	if request.user.is_authenticated() :
+		objs = UserBlacklist.objects.filter(username = request.user.username , video_id = request.GET.get('video_id' , ''))
+		if len(objs) == 0:
+			bl = UserBlacklist(username = request.user.username , video_id = request.GET.get('video_id' , ''))
+			bl.save()
+			return HttpResponse('{ "error" : "Video blacklisted ."')	
+		else:
+			return HttpResponse('{ "error" : "Video already blacklisted ."')	
+	else:
+		return HttpResponse('{ "error" : "User not authenticated ."')
+
+def delete_blacklist(request):
+	request.session['changed'] = 1 
+	if request.user.is_authenticated() :
+		objs = UserBlacklist.objects.filter(username = request.user.username , video_id = request.GET.get('video_id' , ''))
+		if len(objs) == 0:			
+			return HttpResponse('{ "error" : "Video not blacklisted ."')	
+		else:
+			objs.delete()
+			return HttpResponse('{ "error" : "Video un-blacklisted ."')	
+	else:
+		return HttpResponse('{ "error" : "User not authenticated ."')
